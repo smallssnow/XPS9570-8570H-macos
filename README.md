@@ -108,9 +108,13 @@ macbookpro不能外置MIC
 只有mic输入，所以无解。
 
 # HDMI audio 开发记录
-使用weg的手册，但是codec和connect-type均正确却无输出。原因未知
+使用weg的手册，但是codec和connect-type均正确却无输出。原因未知 
 
-尝试使用fakePCIID
+~~尝试使用fakePCIID~~
+
+原因是未检测到codec，所以hdef上无hdmi分支，但是在插入的话无法热启动。
+
+尝试虚拟一个分支，或者伪造一个hdmi，尝试在applealc中添加核显hdmi控制器
 # fan传感器
 获取DSDT的不知道哪里的参数，伪造了个转速，实际原因是因为fan的储存位置不知，其次是如何控制，关于解锁EC可给出建议。但是EC写数据是非常危险的，很可能导致无法开机。
 解锁:0x30a3
