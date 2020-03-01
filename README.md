@@ -81,7 +81,7 @@ dell是双驱动模式的PS2M 和TPL TPD 还有多余的一组TPL和TPD我想是
 
 这是layout为30的  
 首先是0x17为内置speaker输出 01170c02是EAPD的参数，看起来十分好但是0x18的是70108100这个是
-![avatar](https://7.daliansky.net/pinconfigs.png)
+![avatar](./pinconfigs.png)
 是外置输入mic，black linein输入3.5mm接口  
 实际上是正确的，但是他的GPIOmute是错误的
 应该是0x50010018的10进制。实际加入后并无效果
@@ -100,7 +100,7 @@ layout是72的为
 
 2019.8.24 
  新增layout 为32的点在applealc 试音新的applealc即可注入
-# 耳机无声（已解决）
+# 耳机无声
 使用HDEF来注入的话会导致外置mic无法驱动，但是不用的话又会导致耳机输出无声，使用alc298fix+辅助kext或许是导致耳机无mic输入的关键
 注入点正确，但是不显示为外置，而依然是内置mic，怀疑是intel智音系统会自动将外置mic转为内置mic，在win10下也是无法通过3.5mm耳机孔来观看是否是外置还是内置，全部显示为外置，但是在linux下可以显示为外置。
 注入点正确，但是不显示为外置，而依然是内置mic，怀疑是intel智音系统会自动将外置mic转为内置mic，在win10下也是无法通过3.5mm耳机孔来观看是否是外置还是内置，全部显示为外置，但是在linux下可以显示为外置。
@@ -112,13 +112,15 @@ macbookpro不能外置MIC
 只有mic输入，所以无解。
 
 # HDMI audio 开发记录
-使用weg的手册，但是codec和connect-type均正确却无输出。原因未知 
+~~使用weg的手册，但是codec和connect-type均正确却无输出。原因未知~~
 
 ~~尝试使用fakePCIID~~
 
-原因是未检测到codec，所以hdef上无hdmi分支，但是在插入的话无法热启动。
+~~原因是未检测到codec，所以hdef上无hdmi分支，但是在插入的话无法热启动。~~
 
-尝试虚拟一个分支，或者伪造一个hdmi，尝试在applealc中添加核显hdmi控制器
+~~尝试虚拟一个分支，或者伪造一个hdmi，尝试在applealc中添加核显hdmi控制器~~  
+[发现大佬的oc可以完美HDMI音频热拔插](https://github.com/xxxzc/xps15-9570-macos "大佬")
+
 # fan传感器
 获取DSDT的不知道哪里的参数，伪造了个转速，实际原因是因为fan的储存位置不知，其次是如何控制，关于解锁EC可给出建议。但是EC写数据是非常危险的，很可能导致无法开机。
 解锁:0x30a3
@@ -128,7 +130,7 @@ macbookpro不能外置MIC
 
 # 关于解锁MSR和BIOS  
 
-这个暂时我还没想过怎么叙述  
+[这里有很完整的教程](https://github.com/smallssnow/XPS9570-8570H-macos/issues/2) 
 
 # 关于0.8ghz锁频  
 
@@ -147,15 +149,17 @@ macbookpro不能外置MIC
 所以深度修改了变频代码。cinebench R20 bios打开了PL1 PL2 PL3 PL4 关闭功耗墙 修改了小参可以到达3143分
 已经上传但是还是测试功能(代号:仙人掌驱动)，理论上有10%的效果(因为开了节能模式)。
 # 关于睡眠问题
-尝试过很多种做法，但是开盖无法唤醒，目前这个版本可以开盖唤醒，实测待机11小时掉7%的电。
-其中有一个方案是fn+insert待机后一晚上掉2%的电。但是却无法开盖唤醒。
+~~尝试过很多种做法，但是开盖无法唤醒，目前这个版本可以开盖唤醒，实测待机11小时掉7%的电。
+其中有一个方案是fn+insert待机后一晚上掉2%的电。但是却无法开盖唤醒。~~  
+[发现大佬的oc可以完美睡眠唤醒，且不用开盖后再按电源键唤醒](https://github.com/xxxzc/xps15-9570-macos "大佬")
 
 # 关于雷电三热拔插
 有空在编辑
 
 # 已知问题
-### 无hdmiaudio
-### i2C驱动错误
+- i2C驱动错误
+- 雷电三热拔插 
+
 # 鸣谢
 
 * [Apple](https://www.apple.com) for macOS
@@ -167,8 +171,7 @@ macbookpro不能外置MIC
 * [Xigtun](https://github.com/Xigtun/xps-9570-mojave)：与@bavariancake一样，属于早期开源XPS 9570黑苹果配置的无私贡献者，本仓库早期是在
 *基础上对[bavariancake](https://github.com/bavariancake/XPS9570-macOS)的配置进行深度融合，加以改进才得到如今比较完美的配置，谢谢这位无私的同仁！
 * @807133286 ：最早在Xigtun仓库中提出了可移植的[触控板驱动方案](https://github.com/Xigtun/xps-9570-mojave/issues/23)，给XPS 9570拥有将近白苹果触控板的体验，是改善XPS 9570触控版的灵感来源！ 
-* 
-*[LuletterSoul](https://github.com/LuletterSoul/Dell-XPS-15-9570-macOS-Mojave):深度整合了各种优良的EFI并且使用最新方法来完善，EFI几乎是完美的，本MD参考他的。
+* [LuletterSoul](https://github.com/LuletterSoul/Dell-XPS-15-9570-macOS-Mojave):深度整合了各种优良的EFI并且使用最新方法来完善，EFI几乎是完美的，本MD参考他的。
 * [远景论坛](http://bbs.pcbeta.com/forum-559-1.html)：谢谢诸位大神提供的通用教程，让我能够以小白的身份轻松入门！
 * [黑果小兵](https://blog.daliansky.net/): 我想，国内需要更多这样无私的、高水平的黑苹果布道者，感谢他！
 
