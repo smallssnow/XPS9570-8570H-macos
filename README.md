@@ -149,7 +149,7 @@ macbookpro不能外置MIC
 &emsp;&emsp;下载modGRUBShell.efi, 并重命名为bootx64.efi
 
 &emsp;&emsp;在U盘内创建一个EFI文件夹，并再在此文件夹下创建文件夹BOOT，并将bootx64.efi放入BOOT下：
-&emsp;&emsp;![avatar](./123.png "来自网络XJN") 
+&emsp;&emsp;![avatar](./pic/123.png "来自网络XJN") 
 &emsp;&emsp;重启电脑，我们通过UEFI启动此U盘进入GRUB shell
 
 ## 2.寻找指令，解锁
