@@ -3,7 +3,6 @@
 # 硬件配置
 
 ## 已驱动
-
 * Machine :Dell XPS 9570
 * CPU: Intel i7-8750H
 * GPU: UHD630 + Nvidia Gefore 1050Ti(bios断电屏蔽)
@@ -13,10 +12,8 @@
 * Audio: Realtek ALC3266
 * WLAN + Bluetooth : apple 原生网卡
 ## 未驱动
-
 * Goodix fingerpint reader (无解)  
 * ~~Nvidia Geforce 1050Ti (无解，已屏蔽)~~
-
 # 开发记录
 ## I2C
 ### CLOVER
@@ -173,6 +170,7 @@ setup_var_3 0x5C1 0x00
 |PL2 Enable |0x5B1| 0x00(disable)/0x01(enable) | PL2功耗墙 |
 | DVMT Pre-Allocated | 0x8E6 |0x00(0m)/0x01(32m)/0x02(64m) | 0x03(undefined)请注意没有96m |
 | TDP Lock |  0x5BF | 0x00(disable)/0x01(enable) | TDP热设计功耗墙 |
+|下面还未确认具体信息| dangerous&&No specific write value confirmed | ---- | ---- |
 | FAN0 SPEED | 0x38A | 温度和转速设定的一元一次函数 0xF到0x77 | 风扇0转速 |
 | FAN1 SPEED | 0x389 | 温度和转速设定的一元一次函数 0xF到0x77 | 风扇1转速 |
 # 关于0.8ghz锁频  
