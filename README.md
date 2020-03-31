@@ -80,7 +80,7 @@ dell是双驱动模式的PS2M 和TPL TPD 还有多余的一组TPL和TPD我想是
  02171c20 02171d10 02171e21 02171f00>  
 layout=30:  
 首先是0x17为内置speaker输出 01170c02是EAPD的参数，看起来十分好但是0x18的是70108100这个是
-![avatar](./pinconfigs.png)
+![avatar](./pic/pinconfigs.png)
 是外置输入mic，black linein输入3.5mm接口  
 实际上是正确的，但是他的GPIOmute是错误的
 应该是0x50010018的10进制。实际加入后并无效果
@@ -95,16 +95,16 @@ layout=72:
 所以我的思路是对0x18驱动对0x1a屏蔽，也就是分别为0x17内置扬声器
 0x21耳机输出，0x18外置mic输入，0x12内置mic驱动，其余屏蔽
 实际看下来只有layout 为11的比较相似。或许layout 为11更好驱动一些
-## 声路链路图
-![avatar](./codec_0.png "转载请注明smallssnow")   
-![avatar](./codec_2.png "转载请注明smallssnow") 
+## 声路链路图(首发，转载请注明版权)
+![avatar](./pic/codec_0.png "转载请注明smallssnow")   
+![avatar](./pic/codec_2.png "转载请注明smallssnow") 
 2019.8.24 
  新增layout 为32的点在applealc 试音新的applealc即可注入  
 ## opencore 开机duang设置
 ### 1在音频文件夹中找到REsource复制到oc目录中
 ### 2将AudioDxe.efi和OpenCanopy.efi复制到drivers文件夹中
 ### 3按下图设置
- ![avatar](./duangSetting.png "转载请注明smallssnow") 
+ ![avatar](./pic/duangSetting.png "转载请注明smallssnow") 
  注：  
  VolumeAmplifier: 1000  
 音量在原有基础上放的百分比  
@@ -164,7 +164,7 @@ setup_var_3 0x5C1 0x00
 &emsp;&emsp;请注意更新bios不会覆盖大多位置，但是具体情况还是要具体分析
 
 其实主要解锁CFG-LOCK即可  
-![avatar](./msrUnlock.png "转载请注明smallssnow") 
+![avatar](./pic/msrUnlock.png "转载请注明smallssnow") 
 | 名称 | 地址 | 写入值 | 备注
 | :--- | :----: | ----: | ----: |
 | CFG-LOCK | 0x5BD | 0x00(unlock)/0x01(lock) |  解锁E2寄存器 |
@@ -177,10 +177,11 @@ setup_var_3 0x5C1 0x00
 | FAN1 SPEED | 0x389 | 温度和转速设定的一元一次函数 0xF到0x77 | 风扇1转速 |
 # 关于0.8ghz锁频  
 
-&emsp;&emsp;这个之前猜测是I2C的原因，后来发现锁频时主要是核显崩溃或者是核显的其他状态，我觉得是一种自我保护机制，此时风扇转速很慢，在采用cpufriend变频时发现了很容易0。8ghz锁频
+~~&emsp;&emsp;这个之前猜测是I2C的原因，后来发现锁频时主要是核显崩溃或者是核显的其他状态，我觉得是一种自我保护机制，此时风扇转速很慢，在采用cpufriend变频时发现了很容易0。8ghz锁频
 结果有一天还是锁频了，所以猜只要是和GPU的都会在过热时锁频，那么这种锁频有可能是weg的bug或许是核显过热，也就是风扇无法正常启动
 建议在win下改成酷冷或者极速，让风扇转动积极一些，同时升高温度墙，但是撞墙后不会一直锁0.8ghz，所以猜测是dell主板的某些机制导致自锁0.8ghz来保证温度。  
-如果温度墙在60度的话。那么GPU瞬间到达90度，会有（当前频率-k(90-温度墙)*100mhz）=实际频率，那么很有可能直接得到一个很低的实际频率小于800mhz所以让CPu强制锁800mhz    解锁EC风扇控制位，动态注入风扇控制， 
+如果温度墙在60度的话。那么GPU瞬间到达90度，会有（当前频率-k(90-温度墙)*100mhz）=实际频率，那么很有可能直接得到一个很低的实际频率小于800mhz所以让CPu强制锁800mhz  ~~
+  解锁EC风扇控制位，动态注入风扇控制， 
 
 # 关于鸡血代码
 ~~&emsp;&emsp;采用原生XCMP+hWP 代码变频，实际上效果显著，瞬间睿频最大可到4ghz（单核）待机时稳定0.8ghz，可是目前不成熟，有的机子会导致睿频锁死
@@ -194,17 +195,15 @@ setup_var_3 0x5C1 0x00
 [发现大佬的oc可以完美睡眠唤醒，且不用开盖后再按电源键唤醒，耗电更是低到每晚1%](https://github.com/xxxzc/xps15-9570-macos "大佬")
 
 # 关于雷电三热拔插
-&emsp;&emsp;特别渠道得到了xps9560的主板原理图，相信会从中发现端倪。  
-![avatar](./motherboard.png "转载请注明smallssnow") 
+&emsp;&emsp;特别渠道得到了xps9560的主板原理图，相信会从中发现破解端倪。 
+
+![avatar](./pic/motherboard.png "转载请注明smallssnow") 
 # 已知问题
 - i2C驱动错误
 - 雷电三热拔插 
 # 鸣谢
 * [Apple](https://www.apple.com) for macOS
 * [Rehabman](https://github.com/RehabMan)：提供了大量的黑苹果驱动，国外黑苹果论坛的大佬，向大佬致敬！
-* [Lilu](https://github.com/acidanthera/Lilu)： 向该内核扩展项目伟大的逆向工程师与开发者致敬！
-* [WhateverGreen](https://github.com/acidanthera/WhateverGreen)：感谢所有参与该开源内核扩展项目的伟大开发者！
-* [FireWolf](https://github.com/0xFireWolf/)： 提供DPCD最大链路速率修复、Intel HDMI无限循环连接修复、LSPCON驱动支持等核心的通用性开源贡献，使得基于UHD630的一些新机型，特别是XPS 9570提供了非常强大的技术难关攻坚，非常感谢他！
 * [bavariancake](https://github.com/bavariancake/XPS9570-macOS)：提供一份针对XPS 9570 Hackintosh的详尽方案，他的仓库对XPS 9570驱动的每个细节进行了记录，是XPS 9570黑苹果在Github上的开源先驱，为本仓库贡献了大部分配置模板，感谢他的辛勤付出和劳动！
 * [LuletterSoul](https://github.com/LuletterSoul/Dell-XPS-15-9570-macOS-Mojave):深度整合了各种优良的EFI并且使用最新方法来完善，EFI几乎是完美的，本MD参考他的。
 
