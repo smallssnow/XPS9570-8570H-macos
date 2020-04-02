@@ -1,7 +1,6 @@
 # 介绍
  &emsp;&emsp;xps9570 clover/oc 开发记录
 # 硬件配置
-
 ## 已驱动
 * Machine :Dell XPS 9570
 * CPU: Intel i7-8750H
@@ -24,7 +23,7 @@ TPD0的为APIC 轮询pin:0x33
 TPL1的为APIC 轮询pin:0x3b  
 实际上大于0x2F的就是无法使用APIC 中断了
 所以正确的做法是改为GPIO中断
-附上代码
+&emsp;&emsp;附上代码
 
  		Method (_CRS, 0, NotSerialized)          {
            Name (SBFB, ResourceTemplate ()
@@ -51,34 +50,30 @@ TPL1的为APIC 轮询pin:0x3b
             Return (ConcatenateResTemplate (SBFB,SBFG))
         }
 
+&emsp;&emsp;并且将返回值的SBFI置换为SBFG，因为默认是0x17中断，但是实际上要用0x9E中断或者0x1b中断，实测下来kernel task稳定在11%。即使是在快速长久触发GPIO中断下的触摸板时
 
-并且将返回值的SBFI置换为SBFG，因为默认是0x17中断，但是实际上要用0x9E中断或者0x1b中断，实测下来kernel task稳定在11%。即使是在快速长久触发GPIO中断下的触摸板时
-
-TPL1触摸屏同理
+&emsp;&emsp;TPL1触摸屏同理
 
 ------
-dell是双驱动模式的PS2M 和TPL TPD 还有多余的一组TPL和TPD我想是这些影响了高kernel task  
+&emsp;&emsp;dell是双驱动模式的PS2M 和TPL TPD 还有多余的一组TPL和TPD我想是这些影响了高kernel task  
 ### OPENCORE(预留以后填坑)
-
-
 # APPLEALC开发记录
 &emsp;&emsp;很多CLOVER建议是用30或者72的点
 查询源码得知
-
 分别为layout——id为ALC298的点是  
 3，11，13，21，22，28，29，30，47，66，72，99  
 30是Constanta - Realtek ALC298 for Xiaomi Mi Notebook Air 13.3 Fingerprint 2018  
 72是Custom - Realtek ALC298 for Dell XPS 9560 by KNNSpeed  
-显然72更适合xps9570，为什么有些人会觉得72不适合或者30不适合  
+&emsp;&emsp;显然72更适合xps9570，为什么有些人会觉得72不适合或者30不适合  
 让我们查看源代码  
 <01271c30 01271d00 01271ea0 01271f90    
  01771c40 01771d00 01771e17 01771f90 01770c02 (EPAD)  
  01871c70 01871d10 01871e81 01871f00  
  02171c20 02171d10 02171e21 02171f00>  
-layout=30:  
-首先是0x17为内置speaker输出 01170c02是EAPD的参数，看起来十分好但是0x18的是70108100这个是
+&emsp;&emsp;layout=30:  
+&emsp;&emsp;首先是0x17为内置speaker输出 01170c02是EAPD的参数，看起来十分好但是0x18的是70108100这个是
 ![avatar](./pic/pinconfigs.png)
-是外置输入mic，black linein输入3.5mm接口  
+&emsp;&emsp;是外置输入mic，black linein输入3.5mm接口  
 实际上是正确的，但是他的GPIOmute是错误的
 应该是0x50010018的10进制。实际加入后并无效果
 layout=72:  
@@ -88,14 +83,13 @@ layout=72:
 01a71c40 01a71d10 01a71e8b 01a71f03  
 02171c50 02171d10 02171e2b 02171f03 01470c02 01770c02 01a70c02 02170c02>  
 0x18的是完全错误的，但是节点没有0x18的节点，输入定义了但是没有给节点
-
-所以我的思路是对0x18驱动对0x1a屏蔽，也就是分别为0x17内置扬声器
+&emsp;&emsp;所以我的思路是对0x18驱动对0x1a屏蔽，也就是分别为0x17内置扬声器
 0x21耳机输出，0x18外置mic输入，0x12内置mic驱动，其余屏蔽
 实际看下来只有layout 为11的比较相似。或许layout 为11更好驱动一些
-## 声路链路图(首发，转载请注明版权)
+## 声路链路图(首发,转载请注明)
 ![avatar](./pic/codec_0.png "转载请注明smallssnow")   
 ![avatar](./pic/codec_2.png "转载请注明smallssnow") 
-2019.8.24 
+2019.8.24  
  新增layout 为32的点在applealc 试音新的applealc即可注入  
 ## opencore 开机duang设置
 ### 1在音频文件夹中找到REsource复制到oc目录中
@@ -111,22 +105,16 @@ MinimumVolume:
 # 耳机无声
 &emsp;&emsp;使用HDEF来注入的话会导致外置mic无法驱动，但是不用的话又会导致耳机输出无声，使用alc298fix+辅助kext或许是导致耳机无mic输入的关键
 注入点正确，但是不显示为外置，而依然是内置mic，怀疑是intel智音系统会自动将外置mic转为内置mic，在win10下也是无法通过3.5mm耳机孔来观看是否是外置还是内置，全部显示为外置，但是在linux下可以显示为外置。
-注入点正确，但是不显示为外置，而依然是内置mic，怀疑是intel智音系统会自动将外置mic转为内置mic，在win10下也是无法通过3.5mm耳机孔来观看是否是外置还是内置，全部显示为外置，但是在linux下可以显示为外置。
-
-2019.8.24
-更正一些知识点
-macbookpro不能外置MIC
-只能用折中办法将line in来驱动，但是无奈xps15没有line in接口
-只有mic输入，所以无解。
-
+注入点正确，但是不显示为外置，而依然是内置mic，怀疑是intel智音系统会自动将外置mic转为内置mic，在win10下也是无法通过3.5mm耳机孔来观看是否是外置还是内置，全部显示为外置，但是在linux下可以显示为外置。  
+&emsp;&emsp;2019.8.24  
+&emsp;&emsp;更正一些知识点macbookpro不能外置MIC只能用折中办法将line in来驱动，但是无奈xps15没有line in接口只有mic输入，所以无解。
 # HDMI audio 开发记录
-~~使用weg的手册，但是codec和connect-type均正确却无输出。原因未知~~
+~~&emsp;&emsp;使用weg的手册，但是codec和connect-type均正确却无输出。原因未知~~  
+~~&emsp;&emsp;尝试使用fakePCIID~~
 
-~~尝试使用fakePCIID~~
+~~&emsp;&emsp;原因是未检测到codec，所以hdef上无hdmi分支，但是在插入的话无法热启动。~~
 
-~~原因是未检测到codec，所以hdef上无hdmi分支，但是在插入的话无法热启动。~~
-
-~~尝试虚拟一个分支，或者伪造一个hdmi，尝试在applealc中添加核显hdmi控制器~~  
+~~&emsp;&emsp;尝试虚拟一个分支，或者伪造一个hdmi，尝试在applealc中添加核显hdmi控制器~~  
 [发现大佬的oc可以完美HDMI音频热拔插](https://github.com/xxxzc/xps15-9570-macos "大佬")
 
 # fan传感器
@@ -134,10 +122,8 @@ macbookpro不能外置MIC
 ## diy人士请看下面  
 &emsp;&emsp;EC风扇控制器猜测的位置  
 解锁:0x30a3  
-上锁:0x34a3　　
-
-&emsp;&emsp;fan传感器更新：　　　
-
+上锁:0x34a3  
+&emsp;&emsp;fan传感器更新:  
 ~~从EC中获取风扇传感器温度以及PCH温度 DIMM温度现已更新~~
 未在catalina中测试  
 
@@ -153,7 +139,7 @@ macbookpro不能外置MIC
 &emsp;&emsp;重启电脑，我们通过UEFI启动此U盘进入GRUB shell
 
 ## 2.寻找指令，解锁
-setup_var_3 0x5C1 0x00
+&emsp;&emsp;setup_var_3 0x5C1 0x00
 0x5C1是寄存器地址 
 0x00是写入值
 
@@ -170,22 +156,23 @@ setup_var_3 0x5C1 0x00
 |PL2 Enable |0x5B1| 0x00(disable)/0x01(enable) | PL2功耗墙 |
 | DVMT Pre-Allocated | 0x8E6 |0x00(0m)/0x01(32m)/0x02(64m) | 0x03(undefined)请注意没有96m |
 | TDP Lock |  0x5BF | 0x00(disable)/0x01(enable) | TDP热设计功耗墙 |
+| DPTF | 0x39E | 0x00(disable)/0x01(enable) | CPU散热动态调节 |
 |下面还未确认具体信息| dangerous&&No specific write value confirmed | ---- | ---- |
-| FAN0 SPEED | 0x38A | 温度和转速设定的一元一次函数 0xF到0x77 | 风扇0转速 |
-| FAN1 SPEED | 0x389 | 温度和转速设定的一元一次函数 0xF到0x77 | 风扇1转速 |
+| FAN0 SPEED | 0x38A | 温度和转速设定的二元一次函数 0xF到0x77 | 风扇0转速 |
+| FAN1 SPEED | 0x389 | 温度和转速设定的二元一次函数 0xF到0x77 | 风扇1转速 |
+[更多信息点此](https://app.gitbook.com/@smallssnow/s/xps9570/) 
 # 关于0.8ghz锁频  
-
 ~~&emsp;&emsp;这个之前猜测是I2C的原因，后来发现锁频时主要是核显崩溃或者是核显的其他状态，我觉得是一种自我保护机制，此时风扇转速很慢，在采用cpufriend变频时发现了很容易0。8ghz锁频
 结果有一天还是锁频了，所以猜只要是和GPU的都会在过热时锁频，那么这种锁频有可能是weg的bug或许是核显过热，也就是风扇无法正常启动
 建议在win下改成酷冷或者极速，让风扇转动积极一些，同时升高温度墙，但是撞墙后不会一直锁0.8ghz，所以猜测是dell主板的某些机制导致自锁0.8ghz来保证温度。  
-如果温度墙在60度的话。那么GPU瞬间到达90度，会有（当前频率-k(90-温度墙)*100mhz）=实际频率，那么很有可能直接得到一个很低的实际频率小于800mhz所以让CPu强制锁800mhz  ~~
-  解锁EC风扇控制位，动态注入风扇控制， 
-
+如果温度墙在60度的话。那么GPU瞬间到达90度，会有（当前频率-k(90-温度墙)*100mhz）=实际频率，那么很有可能直接得到一个很低的实际频率小于800mhz所以让CPu强制锁800mhz~~  
+  解锁EC风扇控制位，动态注入风扇控制  
+  目前采用bios关闭DPTF解决此问题
 # 关于鸡血代码
 ~~&emsp;&emsp;采用原生XCMP+hWP 代码变频，实际上效果显著，瞬间睿频最大可到4ghz（单核）待机时稳定0.8ghz，可是目前不成熟，有的机子会导致睿频锁死
 有的会温度墙锁死。还在开发中  
 所以深度修改了变频代码。cinebench R20 bios打开了PL1 PL2 PL3 PL4 关闭功耗墙 修改了小参可以到达3143分
-已经上传但是还是测试功能(代号:仙人掌驱动)，理论上有10%的效果(因为开了节能模式)。~~  
+已经上传但是还是测试功能(代号:仙人掌驱动)，理论上有10%的效果(因为开了节能模式)。调整VCC电压和TCCPL1PL2等参数实现~~  
 实际上过于复杂，如果为了测试分数可以使用，但是实际用处不大，故废弃。如果您有更有效的变频请留下创意。常规测试分数。
 ![avatar](./pic/testScore.png "转载请注明smallssnow") 
 # 关于睡眠问题
@@ -195,14 +182,12 @@ setup_var_3 0x5C1 0x00
 
 # 关于雷电三热拔插
 &emsp;&emsp;特别渠道得到了xps9560的主板原理图，相信会从中发现破解端倪。 
-
 ![avatar](./pic/motherboard.png "转载请注明smallssnow") 
 # 已知问题
 - i2C驱动错误
 - 雷电三热拔插 
 # 鸣谢
-* [Apple](https://www.apple.com) for macOS
-* [Rehabman](https://github.com/RehabMan)：提供了大量的黑苹果驱动，国外黑苹果论坛的大佬，向大佬致敬！
-* [bavariancake](https://github.com/bavariancake/XPS9570-macOS)：提供一份针对XPS 9570 Hackintosh的详尽方案，他的仓库对XPS 9570驱动的每个细节进行了记录，是XPS 9570黑苹果在Github上的开源先驱，为本仓库贡献了大部分配置模板，感谢他的辛勤付出和劳动！
+* [Rehabman](https://github.com/RehabMan)
+* [bavariancake](https://github.com/bavariancake/XPS9570-macOS)
 * [LuletterSoul](https://github.com/LuletterSoul/Dell-XPS-15-9570-macOS-Mojave):深度整合了各种优良的EFI并且使用最新方法来完善，EFI几乎是完美的，本MD参考他的。
 
