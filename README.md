@@ -51,9 +51,7 @@ TPL1的为APIC 轮询pin:0x3b
         }
 
 &emsp;&emsp;并且将返回值的SBFI置换为SBFG，因为默认是0x17中断，但是实际上要用0x9E中断或者0x1b中断，实测下来kernel task稳定在11%。即使是在快速长久触发GPIO中断下的触摸板时
-
 &emsp;&emsp;TPL1触摸屏同理
-
 ------
 &emsp;&emsp;dell是双驱动模式的PS2M 和TPL TPD 还有多余的一组TPL和TPD我想是这些影响了高kernel task  
 ### OPENCORE(预留以后填坑)
@@ -120,13 +118,13 @@ MinimumVolume:
 # fan传感器
 &emsp;&emsp;获取DSDT的不知道哪里的参数，伪造了个转速，实际原因是因为fan的储存位置不知，其次是如何控制，关于解锁EC可给出建议。但是EC写数据是非常危险的，很可能导致无法开机。 
 ## diy人士请看下面  
-&emsp;&emsp;EC风扇控制器猜测的位置  
+&emsp;&emsp;EC控制器猜测解锁的位置  
 解锁:0x30a3  
 上锁:0x34a3  
 &emsp;&emsp;fan传感器更新:  
 ~~从EC中获取风扇传感器温度以及PCH温度 DIMM温度现已更新~~
 未在catalina中测试  
-
+[远景上的教程](http://bbs.pcbeta.com/viewthread-1826371-1-1.html)
 # 关于解锁MSR和BIOS (附相关解锁位置)
 &emsp;&emsp;反编译bios文件，后得到了所有部件的寄存器位置，在bios已经实现了显卡供电阻断，但是危险性较高。所以放出部分部件的寄存器位置，供大家解锁
 [这里有很完整的教程](https://github.com/smallssnow/XPS9570-8570H-macos/issues/2) 
@@ -162,27 +160,22 @@ MinimumVolume:
 | FAN1 SPEED | 0x389 | 温度和转速设定的二元一次函数 0xF到0x77 | 风扇1转速 |
 [更多信息点此](https://app.gitbook.com/@smallssnow/s/xps9570/) 
 # 关于0.8ghz锁频  
-~~&emsp;&emsp;这个之前猜测是I2C的原因，后来发现锁频时主要是核显崩溃或者是核显的其他状态，我觉得是一种自我保护机制，此时风扇转速很慢，在采用cpufriend变频时发现了很容易0。8ghz锁频
-结果有一天还是锁频了，所以猜只要是和GPU的都会在过热时锁频，那么这种锁频有可能是weg的bug或许是核显过热，也就是风扇无法正常启动
-建议在win下改成酷冷或者极速，让风扇转动积极一些，同时升高温度墙，但是撞墙后不会一直锁0.8ghz，所以猜测是dell主板的某些机制导致自锁0.8ghz来保证温度。  
-如果温度墙在60度的话。那么GPU瞬间到达90度，会有（当前频率-k(90-温度墙)*100mhz）=实际频率，那么很有可能直接得到一个很低的实际频率小于800mhz所以让CPu强制锁800mhz~~  
   解锁EC风扇控制位，动态注入风扇控制  
   目前采用bios关闭DPTF解决此问题
 # 关于鸡血代码
-~~&emsp;&emsp;采用原生XCMP+hWP 代码变频，实际上效果显著，瞬间睿频最大可到4ghz（单核）待机时稳定0.8ghz，可是目前不成熟，有的机子会导致睿频锁死
-有的会温度墙锁死。还在开发中  
-所以深度修改了变频代码。cinebench R20 bios打开了PL1 PL2 PL3 PL4 关闭功耗墙 修改了小参可以到达3143分
+~~&emsp;&emsp;采用原生XCMP+hWP 代码变频
+所以深度修改了变频代码。cinebench R20 bios关闭了PL1 PL2 关闭功耗墙 修改了小参可以到达3143分
 已经上传但是还是测试功能(代号:仙人掌驱动)，理论上有10%的效果(因为开了节能模式)。调整VCC电压和TCCPL1PL2等参数实现~~  
 实际上过于复杂，如果为了测试分数可以使用，但是实际用处不大，故废弃。如果您有更有效的变频请留下创意。常规测试分数。
-![avatar](./pic/testScore.png "转载请注明smallssnow") 
+![avatar](./pic/testScore.png "转载请注明smallssnow")  
+留坑记录优化过程
 # 关于睡眠问题
-~~尝试过很多种做法，但是开盖无法唤醒，目前这个版本可以开盖唤醒，实测待机11小时掉7%的电。
-其中有一个方案是fn+insert待机后一晚上掉2%的电。但是却无法开盖唤醒。~~  
 [发现大佬的oc可以完美睡眠唤醒，且不用开盖后再按电源键唤醒，耗电更是低到每晚1%](https://github.com/xxxzc/xps15-9570-macos "大佬")
-
 # 关于雷电三热拔插
 &emsp;&emsp;特别渠道得到了xps9560的主板原理图，相信会从中发现破解端倪。 
 ![avatar](./pic/motherboard.png "转载请注明smallssnow") 
+# 关于降压
+留坑
 # 已知问题
 - i2C驱动错误
 - 雷电三热拔插 
