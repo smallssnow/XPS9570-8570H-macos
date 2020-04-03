@@ -4,15 +4,17 @@
 ## 已驱动
 * Machine :Dell XPS 9570
 * CPU: Intel i7-8750H
-* GPU: UHD630 + Nvidia Gefore 1050Ti(bios断电屏蔽)
+* GPU: UHD630 
 * RAM: 16GB RAM
 * Display: 4K Sharp Display
 * SSD: SM961
 * Audio: Realtek ALC3266
 * WLAN + Bluetooth : apple 原生网卡
 ## 未驱动
-* Goodix fingerpint reader (无解)  
-* ~~Nvidia Geforce 1050Ti (无解，已屏蔽)~~
+* Goodix fingerpint reader (bios关闭)  
+* sd-card(bios关闭)
+* touch panel(bios关闭)
+* Nvidia Gefore 1050Ti(bios断电关闭)
 # 开发记录
 ## I2C
 ### CLOVER
